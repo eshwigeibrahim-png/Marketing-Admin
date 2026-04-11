@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم صاحب الكافي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Blaka+Ink&family=Lalezar&family=Reem+Kufi:wght@400..700&family=Ruwudu:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="icon market.png"/>
+  <link rel='stylesheet' href='./style.css'>
+</head>
+<body class="customer-page">
+  <div class="content-wrapper">
+    <div class="menu-box">
+      <h1>لوحة التحكم</h1>
+      <input id="name" placeholder="اسم المنتج">
+      <input id="price" placeholder="السعر" type="number" min="0" step="0.01">
+      <button onclick="addItem()">إضافة</button>
+
+      <div id="itemsList"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

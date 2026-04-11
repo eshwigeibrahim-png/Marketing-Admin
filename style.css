@@ -1,0 +1,85 @@
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ffffe0; color: #8b0000; }
+.customer-page {
+  background-image: url("marking\ backface.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+.content-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.menu-box {
+  width: min(95%, 680px);
+  background: rgba(255, 255, 255, 0.88);
+  border: 3px solid #ff6600;
+  border-radius: 24px;
+  padding: 24px 20px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.15);
+  margin-bottom: 36px;
+  text-align: center;
+}
+.customer-page h1 {
+  margin: 0 0 18px;
+  color: #d40c00;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.9);
+}
+#menuList {
+  display: grid;
+  gap: 9px;
+}
+#menuList > div {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #ffc107;
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: #5a1b00;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+input { margin: 5px; padding: 8px; border: 2px solid #ff6600; }
+button { padding: 8px 12px; margin: 5px; background: #ff6600; color: white; border: none; cursor: pointer; }
+button:hover { background: #ff0000; }
+img { border-radius: 8px; margin-left: 10px; }
+
+#imo1 {
+  width: 100%;
+  height: 650px;
+  margin-top: 2px;
+} 
+
+#cartBtn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: orange;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#cartPopup {
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  border: 2px solid #ccc;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.hidden {
+  display: none;
+}
