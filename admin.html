@@ -9,19 +9,37 @@
   <link href="https://fonts.googleapis.com/css2?family=Blaka+Ink&family=Lalezar&family=Reem+Kufi:wght@400..700&family=Ruwudu:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" href="icon market.png"/>
   <link rel='stylesheet' href='./style.css'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="customer-page">
   <div class="content-wrapper">
     <div class="menu-box">
-      <h1>لوحة التحكم</h1>
-      <input id="name" placeholder="اسم المنتج">
-      <input id="price" placeholder="السعر" type="number" min="0" step="0.01">
-      <button onclick="addItem()">إضافة</button>
+      <h1>إدارة أنواع المنتجات</h1>
+      <div class="input-group">
+        <input id="categoryName" placeholder="اسم النوع (مثلاً: باستا)">
+        <button onclick="addCategory()">إضافة نوع</button>
+      </div>
+      <div id="categoryList"></div>
+    </div>
 
+    <hr>
+    <div class="menu-box">
+      <h1>إضافة المنتج والسعر</h1>
+      <div class="input-group">
+        <select id="productCategory">
+          <option value="">اختر نوع المنتج...</option>
+        </select>
+        <input id="name" placeholder="اسم المنتج">
+        <input id="price" type="number" placeholder="السعر" min="0" step="0.01">
+        <button onclick="addItem()">إضافة المنتج</button>
+      </div>
       <div id="itemsList"></div>
     </div>
   </div>
 
   <script type="module" src="app.js"></script>
 </body>
+
+<div id="orders"></div>
+
 </html>
