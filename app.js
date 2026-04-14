@@ -289,15 +289,9 @@ function playBeep() {
   oscillator.stop(audioContext.currentTime + 0.2);
 }
 
-onSnapshot(collection(db, "orders"), (snapshot) => {
-  snapshot.docChanges().forEach(change => {
-    if (change.type === "added") {
-      playBeep();
-      alert("🛒 طلب جديد وصل!");
-      console.log("طلب:", change.doc.data());
-    }
-  });
-});
+
+
+
 
 // عرض الطلبات في لوحة التحكم
 onSnapshot(collection(db, "orders"), (snapshot) => {
