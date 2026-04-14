@@ -8,11 +8,14 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ffffe
   display: flex;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto; /* يسمح بالتمرير لأسفل إذا كانت القوائم طويلة */
 }
 .content-wrapper {
   width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* أضف هذا السطر لجعلهم تحت بعض */
+  align-items: center;    /* لجعل الصناديق في المنتصف */
+  justify-content: flex-start; /* يبدأ الترتيب من الأعلى */
 }
 .menu-box {
   width: min(95%, 680px);
@@ -45,6 +48,19 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #ffffe
 input { margin: 5px; padding: 8px; border: 2px solid #ff6600; }
 button { padding: 8px 12px; margin: 5px; background: #ff6600; color: white; border: none; cursor: pointer; }
 button:hover { background: #ff0000; }
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.input-group input,
+.input-group select,
+.input-group button {
+  width: 100%;
+  max-width: 300px;
+}
 img { border-radius: 8px; margin-left: 10px; }
 
 #imo1 {
@@ -82,4 +98,45 @@ img { border-radius: 8px; margin-left: 10px; }
 
 .hidden {
   display: none;
+}
+
+/* ضبط عام للهواتف (الشاشات الأصغر من 768px) */
+@media (max-width: 768px) {
+  .customer-page {
+    padding: 10px; /* تقليل المسافة الجانبية في الهاتف */
+  }
+
+  .menu-box {
+    width: 98%; /* استغلال مساحة الشاشة في الهاتف */
+    padding: 15px 10px;
+    border-radius: 15px; /* حواف أنعم قليلاً للموبايل */
+  }
+
+  .customer-page h1 {
+    font-size: 1.8rem; /* تصغير العنوان ليتناسب مع عرض الهاتف */
+  }
+
+  .input-group input, 
+  .input-group select, 
+  .input-group button {
+    max-width: 100%; /* جعل العناصر تأخذ كامل العرض المتاح في الهاتف */
+    font-size: 16px; /* حجم خط مريح للمس */
+  }
+
+  #cartPopup {
+    width: 85%; /* جعل نافذة السلة تأخذ عرض أكبر في الهاتف */
+    left: 7.5%;
+    bottom: 85px;
+  }
+}
+
+/* ضبط إضافي للشاشات الكبيرة (اللابتوب) */
+@media (min-width: 1024px) {
+  .content-wrapper {
+    gap: 30px; /* زيادة المسافة بين الصناديق في الشاشات الواسعة */
+  }
+  
+  .menu-box {
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1); /* ظل أعمق يعطي فخامة للابتوب */
+  }
 }
