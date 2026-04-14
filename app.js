@@ -22,6 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const itemsCollection = collection(db, "menu");
+const categoriesCollection = collection(db, "categories");
 
 console.log("Firebase module loaded", { projectId: firebaseConfig.projectId });
 
@@ -29,11 +30,12 @@ console.log("Firebase module loaded", { projectId: firebaseConfig.projectId });
 async function addItem() {
   const name = document.getElementById("name").value.trim();
   const price = parseFloat(document.getElementById("price").value);
+  const category = document.getElementById("productCategory").value;
 
-  if (name && !Number.isNaN(price)) {
+  if (name && !Number.isNaN(price) && category) {
     try {
-      console.log("Adding product:", { name, price });
-      await addDoc(itemsCollection, { name, price });
+      console.log("Adding product:", { name, price, category });
+      await addDoc(itemsCollection, { name, price, category });
       console.log("تم إضافة المنتج");
       document.getElementById("name").value = "";
       document.getElementById("price").value = "";
@@ -42,7 +44,25 @@ async function addItem() {
       alert("حدث خطأ أثناء حفظ المنتج. تفقد وحدة التحكم لمعرفة التفاصيل.");
     }
   } else {
-    alert("رجاءً أدخل اسم المنتج والسعر.");
+    alert("رجاءً أدخل اسم المنتج والسعر والنوع.");
+  }
+}
+
+async function addCategory() {
+  const categoryName = document.getElementById("categoryName").value.trim();
+
+  if (categoryName) {
+    try {
+      console.log("Adding category:", categoryName);
+      await addDoc(categoriesCollection, { name: categoryName });
+      console.log("تم إضافة النوع");
+      document.getElementById("categoryName").value = "";
+    } catch (error) {
+      console.error("خطأ في إضافة النوع:", error);
+      alert("حدث خطأ أثناء حفظ النوع.");
+    }
+  } else {
+    alert("رجاءً أدخل اسم النوع.");
   }
 }
 
@@ -54,6 +74,20 @@ async function deleteItem(id) {
     console.error("خطأ في حذف المنتج:", error);
   }
 }
+
+async function deleteCategory(id) {
+  try {
+    await deleteDoc(doc(db, "categories", id));
+  } catch (error) {
+    console.error("خطأ في حذف النوع:", error);
+  }
+}
+
+// تعريض الدوال للاستخدام في HTML
+window.addItem = addItem;
+window.deleteItem = deleteItem;
+window.addCategory = addCategory;
+window.deleteCategory = deleteCategory;
 
 // التحديث المباشر لكل صفحة
 onSnapshot(itemsCollection, snapshot => {
@@ -69,7 +103,7 @@ onSnapshot(itemsCollection, snapshot => {
     const item = docSnap.data();
     if (itemsList.id === "itemsList") {
       itemsList.innerHTML += `<div>
-        <strong>${item.name}</strong> - ${item.price} دينار
+        <strong>${item.name}</strong> - ${item.price} دينار - نوع: ${item.category || 'غير محدد'}
         <button onclick="deleteItem('${docSnap.id}')">حذف</button>
       </div>`;
     } else {
@@ -88,6 +122,34 @@ onSnapshot(itemsCollection, snapshot => {
   });
 }, error => {
   console.error("خطأ في استلام البيانات:", error);
+});
+
+// التحديث المباشر للأنواع
+onSnapshot(categoriesCollection, snapshot => {
+  const categoryList = document.getElementById("categoryList");
+  const productCategory = document.getElementById("productCategory");
+
+  if (categoryList) {
+    categoryList.innerHTML = "";
+    snapshot.forEach(docSnap => {
+      const category = docSnap.data();
+      categoryList.innerHTML += `<div>
+        <strong>${category.name}</strong>
+        <button onclick="deleteCategory('${docSnap.id}')">حذف</button>
+      </div>`;
+    });
+  }
+
+  if (productCategory) {
+    // Clear existing options except the first
+    productCategory.innerHTML = '<option value="">اختر نوع المنتج...</option>';
+    snapshot.forEach(docSnap => {
+      const category = docSnap.data();
+      productCategory.innerHTML += `<option value="${category.name}">${category.name}</option>`;
+    });
+  }
+}, error => {
+  console.error("خطأ في استلام الأنواع:", error);
 });
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -210,15 +272,142 @@ function clearCart() {
   displayCart();
 }
 
+// مراقبة الطلبات الجديدة
+function playBeep() {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+  oscillator.type = 'square';
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+onSnapshot(collection(db, "orders"), (snapshot) => {
+  snapshot.docChanges().forEach(change => {
+    if (change.type === "added") {
+      playBeep();
+      alert("🛒 طلب جديد وصل!");
+      console.log("طلب:", change.doc.data());
+    }
+  });
+});
+
+// عرض الطلبات في لوحة التحكم
+onSnapshot(collection(db, "orders"), (snapshot) => {
+  const ordersDiv = document.getElementById("orders");
+  if (!ordersDiv) return;
+
+  ordersDiv.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const order = docSnap.data();
+
+    ordersDiv.innerHTML += `
+      <div style="border:1px solid #ccc; margin:10px; padding:10px;">
+        <h3>طلب جديد</h3>
+
+        ${order.items.map(item => `
+          <p>${item.name} × ${item.quantity}</p>
+        `).join("")}
+
+        <strong>المجموع: ${order.total} دينار</strong>
+      </div>
+    `;
+  });
+});
+
+async function sendOrder() {
+  if (cart.length === 0) {
+    alert("السلة فارغة ❌");
+    return;
+  }
+
+  const order = {
+    items: cart,
+    total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    date: Date.now()
+  };
+
+  try {
+    await addDoc(collection(db, "orders"), order);
+
+    alert("تم إرسال الطلب ✅");
+
+    // تفريغ السلة بعد الطلب
+    cart = [];
+    localStorage.removeItem("cart");
+    displayCart();
+    updateCartCount();
+
+  } catch (error) {
+    console.error("خطأ:", error);
+  }
+}
+
+async function sendOrderAndWhatsApp() {
+  if (cart.length === 0) {
+    alert("السلة فارغة ❌");
+    return;
+  }
+
+  // إرسال إلى Firebase
+  const order = {
+    items: cart,
+    total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    date: Date.now()
+  };
+
+  try {
+    await addDoc(collection(db, "orders"), order);
+    console.log("تم إرسال الطلب إلى Firebase");
+  } catch (error) {
+    console.error("خطأ في إرسال الطلب إلى Firebase:", error);
+    alert("حدث خطأ في إرسال الطلب. حاول مرة أخرى.");
+    return;
+  }
+
+  // إرسال إلى WhatsApp
+  let message = "طلب جديد:%0A";
+  let total = 0;
+
+  cart.forEach(item => {
+    let itemTotal = item.price * item.quantity;
+    total += itemTotal;
+    message += `${item.name} ×${item.quantity} = ${itemTotal}%0A`;
+  });
+
+  message += `%0Aالمجموع: ${total}`;
+  let phone = "218910570022"; // ضع رقم واتساب هنا بدون + أو أصفار زائدة
+  let url = `https://wa.me/${phone}?text=${message}`;
+  window.open(url, "_blank");
+
+  alert("تم إرسال الطلب إلى WhatsApp وFirebase ✅");
+
+  // تفريغ السلة بعد الطلب
+  cart = [];
+  localStorage.removeItem("cart");
+  displayCart();
+  updateCartCount();
+}
+
+// تعريض جميع الدوال
+window.sendOrder = sendOrder;
+window.sendOrderAndWhatsApp = sendOrderAndWhatsApp;
 window.sendToWhatsApp = sendToWhatsApp;
 window.toggleCart = toggleCart;
-window.addItem = addItem;
-window.deleteItem = deleteItem;
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.increaseQty = increaseQty;
 window.decreaseQty = decreaseQty;
 window.clearCart = clearCart;
 
+// تهيئة العرض الأولي
 displayCart();
 updateCartCount();
